@@ -11,7 +11,7 @@ Crony Researcher is tool, to search for similar texts (twins) in large datasets.
 For the program to process the file and work correctly at all, the input file **must be a CSV file**, and the only supported schema for the input data is:
 
 ```text
-id (number); text (string)
+id (number), text (string)
 ```
 
 **Key Information about the data:**

@@ -1,0 +1,23 @@
+[package]
+name = "crony-researcher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+csv = "1.4.0"
+dashmap = "6.1.0"
+rayon = "1.11.0"
+rustc-hash = "2.1.1"
+structopt = "0.3.26"
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true

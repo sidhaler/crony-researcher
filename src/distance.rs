@@ -39,22 +39,22 @@ impl DistanceBuffers {
     }
 }
 
-pub fn token_sort_ratio(
-    a: &str,
-    b: &str,
-    max_distance: usize,
-    bufs: &mut DistanceBuffers,
-) -> usize {
-    normalize(a, &mut bufs.cleaned_a, &mut bufs.sorted_a, &mut bufs.ranges);
-    normalize(b, &mut bufs.cleaned_b, &mut bufs.sorted_b, &mut bufs.ranges);
+// pub fn token_sort_ratio(
+//     a: &str,
+//     b: &str,
+//     max_distance: usize,
+//     bufs: &mut DistanceBuffers,
+// ) -> usize {
+//     normalize(a, &mut bufs.cleaned_a, &mut bufs.sorted_a, &mut bufs.ranges);
+//     normalize(b, &mut bufs.cleaned_b, &mut bufs.sorted_b, &mut bufs.ranges);
 
-    bufs.char_a.clear();
-    bufs.char_a.extend(bufs.sorted_a.chars());
+//     bufs.char_a.clear();
+//     bufs.char_a.extend(bufs.sorted_a.chars());
 
-    bufs.char_b.clear();
-    bufs.char_b.extend(bufs.sorted_b.chars());
-    levenshtein_distance(max_distance, bufs)
-}
+//     bufs.char_b.clear();
+//     bufs.char_b.extend(bufs.sorted_b.chars());
+//     levenshtein_distance(max_distance, bufs)
+// }
 
 pub fn normalize(
     s: &str,
@@ -102,78 +102,78 @@ pub fn normalize(
     }
 }
 
-fn levenshtein_distance(max_distance: usize, bufs: &mut DistanceBuffers) -> usize {
-    let a_len = bufs.char_a.len();
-    let b_len = bufs.char_b.len();
+// fn levenshtein_distance(max_distance: usize, bufs: &mut DistanceBuffers) -> usize {
+//     let a_len = bufs.char_a.len();
+//     let b_len = bufs.char_b.len();
 
-    if a_len.abs_diff(b_len) > max_distance {
-        return max_distance + 1;
-    }
+//     if a_len.abs_diff(b_len) > max_distance {
+//         return max_distance + 1;
+//     }
 
-    if a_len == 0 {
-        return b_len;
-    }
-    if b_len == 0 {
-        return a_len;
-    }
+//     if a_len == 0 {
+//         return b_len;
+//     }
+//     if b_len == 0 {
+//         return a_len;
+//     }
 
-    let (target, source) = if a_len > b_len {
-        (&bufs.char_b[..], &bufs.char_a[..])
-    } else {
-        (&bufs.char_a[..], &bufs.char_b[..])
-    };
+//     let (target, source) = if a_len > b_len {
+//         (&bufs.char_b[..], &bufs.char_a[..])
+//     } else {
+//         (&bufs.char_a[..], &bufs.char_b[..])
+//     };
 
-    let m = target.len();
-    let max_val = max_distance + 1;
+//     let m = target.len();
+//     let max_val = max_distance + 1;
 
-    bufs.cache.clear();
-    bufs.cache.extend((0..=m).map(|x| min(x, max_val)));
+//     bufs.cache.clear();
+//     bufs.cache.extend((0..=m).map(|x| min(x, max_val)));
 
-    for (i, &s_char) in source.iter().enumerate() {
-        let row = i + 1;
-        let start = if row > max_distance {
-            row - max_distance
-        } else {
-            1
-        };
-        let end = min(m, row + max_distance);
+//     for (i, &s_char) in source.iter().enumerate() {
+//         let row = i + 1;
+//         let start = if row > max_distance {
+//             row - max_distance
+//         } else {
+//             1
+//         };
+//         let end = min(m, row + max_distance);
 
-        let mut diagonal = bufs.cache[start - 1];
+//         let mut diagonal = bufs.cache[start - 1];
 
-        if start == 1 {
-            bufs.cache[0] = row;
-        } else {
-            bufs.cache[start - 1] = max_val;
-        }
+//         if start == 1 {
+//             bufs.cache[0] = row;
+//         } else {
+//             bufs.cache[start - 1] = max_val;
+//         }
 
-        let mut min_in_row = max_val;
+//         let mut min_in_row = max_val;
 
-        for j in (start - 1)..end {
-            let t_char = target[j];
-            let next_diagonal = bufs.cache[j + 1];
+//         for j in (start - 1)..end {
+//             let t_char = target[j];
+//             let next_diagonal = bufs.cache[j + 1];
 
-            let cost = if s_char == t_char { 0 } else { 1 };
+//             let cost = if s_char == t_char { 0 } else { 1 };
 
-            bufs.cache[j + 1] = min(
-                min(bufs.cache[j + 1] + 1, bufs.cache[j] + 1),
-                diagonal + cost,
-            );
+//             bufs.cache[j + 1] = min(
+//                 min(bufs.cache[j + 1] + 1, bufs.cache[j] + 1),
+//                 diagonal + cost,
+//             );
 
-            min_in_row = min(min_in_row, bufs.cache[j + 1]);
-            diagonal = next_diagonal;
-        }
+//             min_in_row = min(min_in_row, bufs.cache[j + 1]);
+//             diagonal = next_diagonal;
+//         }
 
-        if min_in_row > max_distance {
-            return max_val;
-        }
-    }
+//         if min_in_row > max_distance {
+//             return max_val;
+//         }
+//     }
 
-    if bufs.cache[m] <= max_distance {
-        bufs.cache[m]
-    } else {
-        max_val
-    }
-}
+//     if bufs.cache[m] <= max_distance {
+//         bufs.cache[m]
+//     } else {
+//         max_val
+//     }
+// }
 
 /// This is implementation of bounded Levenshtein - ukkonen's algorithm
 /// https://en.wikipedia.org/wiki/Levenshtein_distance ; https://en.wikipedia.org/wiki/Ukkonen%27s_algorithm
@@ -205,6 +205,8 @@ pub fn levenshtein_distance_raw(
     // Re-use the pre-allocated cache buffer
     bufs.cache.clear();
     bufs.cache.extend((0..=m).map(|x| min(x, max_val)));
+
+    // assert!(bufs.cache.len() > m); // might be usefull for compiler
 
     for (i, &s_char) in source.iter().enumerate() {
         let row = i + 1;
@@ -250,5 +252,68 @@ pub fn levenshtein_distance_raw(
         bufs.cache[m]
     } else {
         max_val
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_normalize() {
+        let mut cleaned_buf = String::new();
+        let mut sorted_buf = String::new();
+        let mut token_ranges = Vec::new();
+
+        normalize(
+            "Hello World!",
+            &mut cleaned_buf,
+            &mut sorted_buf,
+            &mut token_ranges,
+        );
+
+        assert_eq!(cleaned_buf, "hello world");
+        assert_eq!(sorted_buf, "hello world");
+        assert_eq!(token_ranges, vec![(0, 5), (6, 11)]);
+
+        normalize(
+            "World Hello",
+            &mut cleaned_buf,
+            &mut sorted_buf,
+            &mut token_ranges,
+        );
+        assert_eq!(sorted_buf, "hello world");
+
+        normalize(
+            "  Test   cases!!!  ",
+            &mut cleaned_buf,
+            &mut sorted_buf,
+            &mut token_ranges,
+        );
+        assert_eq!(cleaned_buf, "  test   cases  ");
+        assert_eq!(sorted_buf, "cases test");
+    }
+
+    #[test]
+    fn test_levenshtein_distance_raw() {
+        let mut bufs = DistanceBuffers::new();
+
+        let a: Vec<char> = "kitten".chars().collect();
+        let b: Vec<char> = "sitting".chars().collect();
+        let max_distance = 10;
+
+        let dist = levenshtein_distance_raw(&a, &b, max_distance, &mut bufs);
+        assert_eq!(dist, 3);
+
+        let a2: Vec<char> = "flaw".chars().collect();
+        let b2: Vec<char> = "lawn".chars().collect();
+        let dist2 = levenshtein_distance_raw(&a2, &b2, 10, &mut bufs);
+        assert_eq!(dist2, 2);
+
+        let dist_exceeds = levenshtein_distance_raw(&a, &b, 2, &mut bufs);
+        assert_eq!(dist_exceeds, 3);
+
+        let dist_exact = levenshtein_distance_raw(&a, &a, 10, &mut bufs);
+        assert_eq!(dist_exact, 0);
     }
 }

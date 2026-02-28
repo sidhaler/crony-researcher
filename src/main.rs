@@ -89,8 +89,12 @@ fn main() {
     let duration_search = search_start.elapsed();
 
     println!("--------------------------------------------------");
-    println!("Time elapsed on search: {:?}", duration_search);
-    // println!("Time in microseconds: {}", duration_search.as_micros()); just for debug
+
+    println!(
+        "Time elapsed on search: {:?}",
+        duration_search
+    );
+
     println!("Total unique twins found: {}", saved_results.len());
 
     let duration = start.elapsed();
@@ -110,6 +114,8 @@ pub struct SimilarityResult {
     pub distance: usize,
 }
 
+// there will be problem when id is not a number
+/// load data from csv
 fn load_data_from_csv(file_path: &str) -> Result<Vec<(usize, String)>, Box<dyn Error>> {
     let file = File::open(file_path)?;
     let mut rdr = csv::Reader::from_reader(file);
@@ -117,7 +123,8 @@ fn load_data_from_csv(file_path: &str) -> Result<Vec<(usize, String)>, Box<dyn E
 
     for result in rdr.records() {
         let record = result?;
-        let id: usize = record[0].parse()?;
+
+        let id: usize = record[0].trim().parse()?; // just to be sure that id is a number, trim any whitespace
         let text: String = record[1].to_string();
 
         records.push((id, text));
@@ -126,6 +133,7 @@ fn load_data_from_csv(file_path: &str) -> Result<Vec<(usize, String)>, Box<dyn E
     Ok(records)
 }
 
+/// export data to csv
 fn save_results_to_csv(
     results: &Vec<SimilarityResult>,
     file_path: &str,

@@ -15,6 +15,7 @@ id (number), text (string)
 ```
 
 **Key Information about the data:**
+
 - The file format must strictly be a **CSV**.
 - The **id field is not optional** – each record must have a unique numerical identifier.
 - The program will automatically **filter out empty strings** (records with no text will not be taken into account in the search process).
@@ -53,6 +54,6 @@ To be added soon.
 
 ## TODO
 
-- [ ] Add unit tests.
+- [x] Add unit tests.
 - [ ] Add benchmark results.
 - [ ] Add more arguments.

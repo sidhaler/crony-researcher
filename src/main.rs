@@ -4,6 +4,7 @@ use std::error::Error;
 use std::fs::File;
 use std::time::Instant;
 use structopt::StructOpt;
+use humantime::format_duration;
 
 #[derive(Debug, StructOpt)]
 #[structopt()]
@@ -25,6 +26,9 @@ struct Opt {
     /// results path is the path to the CSV file that will contain the results
     #[structopt(short = "o", long = "results-path", default_value = "results.csv")]
     results_path: String,
+    /// expected: bag-of-words or concat. When using concat, whitespaces are strippeded before the strings are compared.
+    #[structopt(short = "m", long = "mode", default_value = "bag-of-words", possible_values = &["concat", "bag-of-words"])]
+    mode: String,
 }
 
 fn main() {
@@ -42,11 +46,19 @@ fn main() {
     let max_distance = opt.max_distance;
     let data_path = opt.data_path;
     let results_path = opt.results_path;
+    let mode = match opt.mode.as_str() {
+        "concat" => true,
+        "bag-of-words" => false,
+        _ => {
+            eprintln!("Invalid mode: {}", opt.mode);
+            return;
+        }
+    };
 
-    let start = Instant::now();
+    let start = Instant::now(); // start timer
 
     println!("Loading data from CSV...");
-    let data = match load_data_from_csv(&data_path) {
+    let data = match load_data_from_csv(&data_path, mode) {
         Ok(d) => d,
         Err(e) => {
             eprintln!("Error reading CSV: {}", e);
@@ -82,17 +94,18 @@ fn main() {
                 })
         })
         .collect();
+    
+    let duration_search = search_start.elapsed();
 
     // there must be something to replace unstable sort
     saved_results.sort_unstable_by_key(|r| r.query_id);
 
-    let duration_search = search_start.elapsed();
 
     println!("--------------------------------------------------");
 
     println!(
-        "Time elapsed on search: {:?}",
-        duration_search
+        "Time elapsed on search: {}",
+        format_duration(duration_search)
     );
 
     println!("Total unique twins found: {}", saved_results.len());
@@ -104,7 +117,7 @@ fn main() {
         Err(e) => eprintln!("Error saving results: {}", e),
     }
 
-    println!("\nProgram execution time: {:?}", duration);
+    println!("\nProgram execution time: {}", format_duration(duration));
 }
 
 #[derive(Debug)]
@@ -116,7 +129,7 @@ pub struct SimilarityResult {
 
 // there will be problem when id is not a number
 /// load data from csv
-fn load_data_from_csv(file_path: &str) -> Result<Vec<(usize, String)>, Box<dyn Error>> {
+fn load_data_from_csv(file_path: &str, concat_mode: bool) -> Result<Vec<(usize, String)>, Box<dyn Error>> {
     let file = File::open(file_path)?;
     let mut rdr = csv::Reader::from_reader(file);
     let mut records = Vec::new();
@@ -125,7 +138,11 @@ fn load_data_from_csv(file_path: &str) -> Result<Vec<(usize, String)>, Box<dyn E
         let record = result?;
 
         let id: usize = record[0].trim().parse()?; // just to be sure that id is a number, trim any whitespace
-        let text: String = record[1].to_string();
+        let mut text: String = record[1].to_string();
+
+        if concat_mode{
+            text.retain(|c| !c.is_whitespace()); // remove all whitespace characters for concat mode
+        }
 
         records.push((id, text));
     }

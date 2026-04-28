@@ -61,6 +61,7 @@ version = "0.1.0"
 dependencies = [
  "csv",
  "dashmap",
+ "humantime",
  "rayon",
  "rustc-hash",
  "structopt",
@@ -155,6 +156,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "humantime"
+version = "2.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "135b12329e5e3ce057a9f972339ea52bc954fe1e9358ef27f95e89716fbc5424"
 
 [[package]]
 name = "itoa"

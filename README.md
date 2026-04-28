@@ -40,6 +40,21 @@ The program can be configured during runtime using the following flags:
   **Description:** Path to the CSV file where the search results will be saved (contains the fields: `query_id`, `twin_id`, `distance`).
   **Default:** `results.csv`
 
+- `-m`, `--mode` <value>
+  **Description:** Controls how text is normalized before comparison. `bag-of-words` keeps spaces as token separators, while `concat` removes all whitespace first.
+  **Default:** `bag-of-words`
+
+## Additional Notes
+
+- Empty text rows are ignored automatically during indexing.
+- Results are stored as CSV with three columns: `query_id`, `twin_id`, and `distance`.
+- Similarity search is based on trigram filtering plus Levenshtein distance checks.
+
+## Examples
+
+- Default mode: `cargo run --release -- --data-path data.csv --results-path results.csv`
+- Concatenation mode: `cargo run --release -- --mode concat --data-path data.csv --results-path results.csv`
+
 ## Example Usage
 
 You will achieve the best performance by compiling and running the program in `release` mode:
